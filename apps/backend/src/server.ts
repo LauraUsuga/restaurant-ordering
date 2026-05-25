@@ -5,6 +5,7 @@ import cors from 'cors'
 import { seedProducts } from './seed/products.seed'
 import menuRoutes from './routes/menu.routes'
 import cartRoutes from './routes/cart.routes'
+import ordersRoutes from './routes/orders.routes'
 
 dotenv.config()
 
@@ -18,6 +19,8 @@ app.get('/health', (_, res) => {
 })
 app.use("/menu", menuRoutes)
 app.use("/cart", cartRoutes)
+app.use("/orders", ordersRoutes)
+
 const mongoUri = process.env.MONGO_URI!
 
 mongoose.connect(mongoUri).then(async () => {

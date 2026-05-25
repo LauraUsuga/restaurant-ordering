@@ -1,14 +1,24 @@
 import { v4 as uuid } from "uuid"
+import { TimelineEvent } from "../models/TimelineEvent"
 
-export const createEvent = ({
+type CreateEventInput = {
+  orderId: string
+  userId: string
+  type: string
+  source: "web" | "api" | "worker"
+  correlationId: string
+  payload: unknown
+}
+
+export const createTimelineEvent = async ({
   orderId,
   userId,
   type,
   source,
   correlationId,
   payload
-}: any) => {
-  return {
+}: CreateEventInput) => {
+  const event = await TimelineEvent.create({
     eventId: uuid(),
     timestamp: new Date().toISOString(),
     orderId,
@@ -17,5 +27,7 @@ export const createEvent = ({
     source,
     correlationId,
     payload
-  }
+  })
+
+  return event
 }
