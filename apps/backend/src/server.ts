@@ -7,13 +7,17 @@ dotenv.config()
 
 const mongoUri = process.env.MONGO_URI!
 
-mongoose.connect(mongoUri).then(async () => {
-  console.log("MongoDB Atlas connected")
-  await seedProducts()
-})
+const isTest = process.env.NODE_ENV === "test"
 
-const port = process.env.PORT || 3001
+if (!isTest) {
+  mongoose.connect(mongoUri).then(async () => {
+    console.log("MongoDB Atlas connected")
+    await seedProducts()
+  })
 
-app.listen(port, () => {
-  console.log(`Server running on ${port}`)
-})
+  const port = process.env.PORT || 3001
+
+  app.listen(port, () => {
+    console.log(`Server running on ${port}`)
+  })
+}

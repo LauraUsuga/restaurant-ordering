@@ -5,7 +5,7 @@
   "main": "index.js",
   "message": "API running",
   "scripts": {
-    "test": "jest",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --runInBand",
     "dev": "tsx watch src/server.ts",
     "offline": "serverless offline",
     "build": "tsc"
@@ -28,6 +28,7 @@
     "@types/node": "^25.9.1",
     "@types/supertest": "^7.2.0",
     "@types/uuid": "^10.0.0",
+    "cross-env": "^10.1.0",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "serverless": "^3.40.0",
