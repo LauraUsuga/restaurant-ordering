@@ -1,0 +1,17 @@
+service: restaurant-ordering-api
+
+frameworkVersion: "3"
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  api:
+    handler: src/server.handler
+    events:
+      - httpApi: "*"
