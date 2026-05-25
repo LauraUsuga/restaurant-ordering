@@ -8,83 +8,89 @@ export const seedProducts = async () => {
     {
       name: "Classic Burger",
       category: "burgers",
-      description: "Beef burger with simple toppings",
+      description:
+        "Artisan bread, choice of meat, cheddar cheese, tomato, European lettuce, onion, pickles and house sauce",
       priceCents: 1200,
       imageUrl:
-        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd",
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=60",
+
       modifierGroups: [
         {
-          id: "protein",
-          name: "Protein",
+          id: "meat",
+          name: "Choose your meat",
           required: true,
           min: 1,
           max: 1,
           options: [
             { id: "beef", name: "Beef", priceCents: 0 },
-            { id: "chicken", name: "Chicken", priceCents: 0 }
+            { id: "chicken", name: "Chicken", priceCents: 0 },
+            { id: "veggie", name: "Veggie patty", priceCents: 0 }
           ]
         },
         {
-          id: "toppings",
-          name: "Toppings",
+          id: "extras",
+          name: "Add extras",
           required: false,
           min: 0,
-          max: 3,
+          max: 5,
           options: [
-            { id: "cheese", name: "Cheese", priceCents: 100 },
-            { id: "lettuce", name: "Lettuce", priceCents: 0 },
-            { id: "tomato", name: "Tomato", priceCents: 0 }
+            { id: "cheese", name: "Extra cheese", priceCents: 100 },
+            { id: "bacon", name: "Bacon", priceCents: 200 },
+            { id: "egg", name: "Fried egg", priceCents: 150 },
+            { id: "double_meat", name: "Double meat", priceCents: 400 }
+          ]
+        },
+        {
+          id: "no",
+          name: "Remove ingredients",
+          required: false,
+          min: 0,
+          max: 6,
+          options: [
+            { id: "no_onion", name: "No onion", priceCents: 0 },
+            { id: "no_pickles", name: "No pickles", priceCents: 0 },
+            { id: "no_tomato", name: "No tomato", priceCents: 0 },
+            { id: "no_lettuce", name: "No lettuce", priceCents: 0 },
+            { id: "no_sauce", name: "No house sauce", priceCents: 0 }
           ]
         }
       ]
-    },
+    }
 
     {
       name: "Chicken Wrap",
       category: "wraps",
-      description: "Fresh wrap with chicken and veggies",
+      description: "Shredded Chicken Breast, Tomato, Mozzarella Cheese, Lettuce, and Mayonnaise.",
       priceCents: 1000,
       imageUrl:
-        "https://images.unsplash.com/photo-1626645738196-c2a7c87a2d2f",
-      modifierGroups: [
-        {
-          id: "protein",
-          name: "Protein",
-          required: true,
-          min: 1,
-          max: 1,
-          options: [
-            { id: "chicken", name: "Chicken", priceCents: 0 }
-          ]
-        }
-      ]
+        "https://images.unsplash.com/photo-1666819604634-98dd67634148?auto=format&fit=crop&w=600&q=6"
     },
 
     {
       name: "Fries",
       category: "sides",
-      description: "Crispy fries",
+      description: "Hot, crispy, and delicious. Enjoy our world-famous fries, from the first one to the last.",
       priceCents: 500,
       imageUrl:
-        "https://images.unsplash.com/photo-1606755962773-d324e0a13086"
+        "https://images.unsplash.com/photo-1573080496219-bb080dd4f87?auto=format&fit=crop&w=600&q=6"
     },
 
     {
       name: "Pizza Margherita",
       category: "pizzas",
-      description: "Classic pizza with tomato and cheese",
+      description: "Simple yet perfect—that’s our Margarita. A tomato sauce base, buffalo mozzarella, basil, and extra-virgin olive oil",
       priceCents: 1500,
       imageUrl:
-        "https://images.unsplash.com/photo-1601924582970-9238bcb495d9"
+        "https://images.unsplash.com/photo-1573821663912-6df460f9c684?auto=format&fit=crop&w=600&q=6"
     },
 
     {
       name: "Salad Bowl",
       category: "salads",
-      description: "Healthy fresh salad",
+      description: "Chicken tinga salad (mildly spicy), nachos, pico de gallo, guacamole, tomato, corn, lettuce, and house sauce.",
       priceCents: 900,
       imageUrl:
-        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe"
+        "https://images.unsplash.com/photo-1623428187969-5da2dcea5ebf?auto=format&fit=crop&w=600&q=6"
     },
 
     {
@@ -93,7 +99,21 @@ export const seedProducts = async () => {
       description: "Cold drink",
       priceCents: 300,
       imageUrl:
-        "https://images.unsplash.com/photo-1622483767028-3f66f32aef97"
+        "https://images.unsplash.com/photo-1629654613528-5d0a2e4166de?auto=format&fit=crop&w=600&q=6",
+      modifierGroups: [
+        {
+          id: "type",
+          name: "Type",
+          required: true,
+          min: 1,
+          max: 1,
+          options: [
+            { id: "coke", name: "Coke", priceCents: 0 },
+            { id: "pepsi", name: "Pepsi", priceCents: 0 },
+            { id: "colombiana", name: "Colombiana", priceCents: 0 }
+          ]
+        }
+      ]
     },
 
     {
@@ -102,7 +122,21 @@ export const seedProducts = async () => {
       description: "Vanilla dessert",
       priceCents: 600,
       imageUrl:
-        "https://images.unsplash.com/photo-1501443762994-82bd5dace89a"
+        "https://images.unsplash.com/photo-1580915411954-282cb1b0d780?auto=format&fit=crop&w=600&q=6",
+      modifierGroups: [
+        {
+          id: "flavor",
+          name: "Flavor",
+          required: true,
+          min: 1,
+          max: 1,
+          options: [
+            { id: "vanilla", name: "Vanilla", priceCents: 0 },
+            { id: "chocolate", name: "Chocolate", priceCents: 0 },
+            { id: "strawberry", name: "Strawberry", priceCents: 0 }
+          ]
+        }
+      ]
     }
   ])
 
