@@ -1,17 +1,15 @@
-import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from 'express'
 
-export const payloadLimit = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const size = Buffer.byteLength(
-    JSON.stringify(req.body)
-  )
+export const payloadLimit = (req: Request, res: Response, next: NextFunction) => {
+  const body = req.body || {}
 
-  if (size > 16384) {
-    return res.status(400).json({
-      error: "Payload exceeds 16KB"
+  const size = Buffer.byteLength(JSON.stringify(body))
+
+  const limit = 1024 * 1024 // 1MB por ejemplo
+
+  if (size > limit) {
+    return res.status(413).json({
+      message: 'Payload too large'
     })
   }
 
