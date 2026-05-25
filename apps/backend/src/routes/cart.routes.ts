@@ -2,7 +2,7 @@ import { Router } from "express"
 import { Product } from "../models/Product"
 import { CartItem } from "../models/CartItem"
 import { calculateItemPrice } from "../services/pricing.services";
-import { createEvent } from "../services/timeline.service"
+import { createTimelineEvent } from "../services/timeline.service"
 
 const router = Router()
 
@@ -12,7 +12,21 @@ router.post("/items", async (req, res) => {
   const product = await Product.findById(productId)
 
   if (!product) {
-    return res.status(404).json({ error: "Product not found" })
+    await createTimelineEvent({
+      orderId: "cart",
+      userId,
+      type: "VALIDATION_FAILED",
+      source: "api",
+      correlationId,
+      payload: {
+        reason: "PRODUCT_NOT_FOUND",
+        productId
+      }
+    })
+
+    return res.status(404).json({
+      error: "Product not found"
+    })
   }
 
   const totalPriceCents = calculateItemPrice(product, quantity, selectedModifiers)
@@ -26,7 +40,18 @@ router.post("/items", async (req, res) => {
     totalPriceCents
   })
 
-  const event = createEvent({
+  await createTimelineEvent({
+    orderId: "cart",
+    userId,
+    type: "PRICING_CALCULATED",
+    source: "api",
+    correlationId,
+    payload: {
+      subtotalCents: totalPriceCents
+    }
+  })
+
+  const event = createTimelineEvent({
     orderId: "cart", // simplificado por ahora
     userId,
     type: "CART_ITEM_ADDED",
@@ -42,5 +67,75 @@ router.post("/items", async (req, res) => {
     event
   })
 })
+
+router.patch("/items/:id", async (req, res) => {
+  const { quantity } = req.body
+
+  const item = await CartItem.findById(
+    req.params.id
+  )
+
+  if (!item) {
+    return res.status(404).json({
+      error: "Cart item not found"
+    })
+  }
+
+  item.quantity = quantity
+
+  item.totalPriceCents =
+    (item.basePriceCents ?? 0) * quantity
+
+  await item.save()
+
+  await createTimelineEvent({
+    orderId: "cart",
+    userId: item.userId ?? "mock-user-1",
+    type: "CART_ITEM_UPDATED",
+    source: "api",
+    correlationId: "cart-update",
+    payload: {
+      itemId: item._id,
+      quantity
+    }
+  })
+
+  return res.json(item)
+})
+
+router.delete(
+  "/items/:id",
+  async (req, res) => {
+    const item =
+      await CartItem.findById(
+        req.params.id
+      )
+
+    if (!item) {
+      return res.status(404).json({
+        error: "Cart item not found"
+      })
+    }
+
+    await CartItem.findByIdAndDelete(
+      req.params.id
+    )
+
+    await createTimelineEvent({
+      orderId: "cart",
+      userId: item.userId ?? "mock-user-1",
+      type: "CART_ITEM_REMOVED",
+      source: "api",
+      correlationId: "cart-delete",
+      payload: {
+        itemId: item._id
+      }
+    })
+
+    return res.json({
+      success: true
+    })
+  }
+)
 
 export default router

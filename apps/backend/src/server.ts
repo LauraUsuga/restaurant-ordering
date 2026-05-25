@@ -6,11 +6,13 @@ import { seedProducts } from './seed/products.seed'
 import menuRoutes from './routes/menu.routes'
 import cartRoutes from './routes/cart.routes'
 import ordersRoutes from './routes/orders.routes'
+import { payloadLimit } from './middleware/payload-limit'
 
 dotenv.config()
 
 const app = express()
 app.use(cors())
+app.use(payloadLimit)
 app.use(express.json())
 app.get('/health', (_, res) => {
   res.json({
