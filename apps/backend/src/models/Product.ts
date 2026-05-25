@@ -20,6 +20,8 @@ const ProductSchema = new mongoose.Schema(
     name: String,
     description: String,
     priceCents: Number,
+    category: String,
+    imageUrl: String,
     modifierGroups: [ModifierGroupSchema]
   },
   { timestamps: true }
