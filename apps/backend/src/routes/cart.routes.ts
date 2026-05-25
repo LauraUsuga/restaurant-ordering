@@ -138,4 +138,53 @@ router.delete(
   }
 )
 
+router.get("/:userId", async (req, res) => {
+  const cartItems =
+    await CartItem.find({
+      userId: req.params.userId
+    })
+
+  const subtotalCents =
+    cartItems.reduce(
+      (acc, item) =>
+        acc +
+        (item.totalPriceCents ?? 0),
+      0
+    )
+
+  const taxPercent =
+    Number(process.env.TAX_PERCENT) || 10
+
+  const serviceFeePercent =
+    Number(
+      process.env.SERVICE_FEE_PERCENT
+    ) || 5
+
+  const taxCents = Math.round(
+    subtotalCents *
+    (taxPercent / 100)
+  )
+
+  const serviceFeeCents =
+    Math.round(
+      subtotalCents *
+      (serviceFeePercent / 100)
+    )
+
+  const totalCents =
+    subtotalCents +
+    taxCents +
+    serviceFeeCents
+
+  return res.json({
+    items: cartItems,
+    pricing: {
+      subtotalCents,
+      taxCents,
+      serviceFeeCents,
+      totalCents
+    }
+  })
+})
+
 export default router

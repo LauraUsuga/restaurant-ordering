@@ -97,6 +97,27 @@ router.post("/", async (req, res) => {
 })
 
 /**
+ * GET /orders/:orderId
+ */
+router.get(
+  "/:orderId",
+  async (req, res) => {
+    const order =
+      await Order.findById(
+        req.params.orderId
+      )
+
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found"
+      })
+    }
+
+    return res.json(order)
+  }
+)
+
+/**
  * GET /orders/:orderId/timeline
  */
 router.get(
