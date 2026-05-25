@@ -55,7 +55,7 @@ export const seedProducts = async () => {
           ]
         }
       ]
-    }
+    },
 
     {
       name: "Chicken Wrap",
@@ -72,7 +72,7 @@ export const seedProducts = async () => {
       description: "Hot, crispy, and delicious. Enjoy our world-famous fries, from the first one to the last.",
       priceCents: 500,
       imageUrl:
-        "https://images.unsplash.com/photo-1573080496219-bb080dd4f87?auto=format&fit=crop&w=600&q=6"
+        "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=600&q=6"
     },
 
     {
