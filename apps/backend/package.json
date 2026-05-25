@@ -24,11 +24,16 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.9.1",
+    "@types/supertest": "^7.2.0",
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "serverless": "^3.40.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.10.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
