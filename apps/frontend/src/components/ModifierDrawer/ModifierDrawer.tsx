@@ -183,9 +183,13 @@ export default function ModifierDrawer({
                           {opt.name}
                         </Typography>
 
-                        {opt.priceCents > 0 && (
+                        {opt.priceCents > 0 ? (
                           <Typography variant="caption" sx={{ color: theme.palette.primary.main }}>
                             +${(opt.priceCents / 100).toFixed(2)}
+                          </Typography>
+                        ) : (
+                          <Typography variant="caption" sx={{ color: theme.palette.primary.main }}>
+                            $0
                           </Typography>
                         )}
                       </Box>
