@@ -10,7 +10,10 @@ const SelectedModifierSchema = new mongoose.Schema({
 const CartItemSchema = new mongoose.Schema(
   {
     userId: String,
-    productId: String,
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product"
+    },
     quantity: Number,
     selectedModifiers: [SelectedModifierSchema],
     basePriceCents: Number,

@@ -14,10 +14,15 @@ export const addCartItem = async (req: any, res: any) => {
   const totalPriceCents = calculateItemPrice(product, quantity, selectedModifiers)
 
   const item = await CartItem.create({
-    userId, productId, quantity, selectedModifiers,
+    userId,
+    productId,
+    quantity,
+    selectedModifiers,
     basePriceCents: product.priceCents,
     totalPriceCents
   })
+
+  const populatedItem = await item.populate("productId")
 
   await createTimelineEvent({
     orderId: "cart",
@@ -28,7 +33,7 @@ export const addCartItem = async (req: any, res: any) => {
     payload: { productId, quantity, totalPriceCents, itemId: item._id }
   })
 
-  return res.status(201).json(item)
+  return res.status(201).json(populatedItem)
 }
 
 // PATCH /cart/items/:id
@@ -36,7 +41,12 @@ export const updateCartItem = async (req: any, res: any) => {
   const { id } = req.params
   const { quantity } = req.body
 
-  const item = await CartItem.findByIdAndUpdate(id, { quantity }, { new: true })
+  const item = await CartItem.findByIdAndUpdate(
+    id,
+    { quantity },
+    { new: true }
+  ).populate("productId")
+
   if (!item) return res.status(404).json({ error: "Item not found" })
 
   await createTimelineEvent({
@@ -73,7 +83,6 @@ export const removeCartItem = async (req: any, res: any) => {
 export const getCart = async (req: any, res: any) => {
   const { userId } = req.params
   const items = await CartItem.find({ userId }).populate("productId")
-
   const subtotalCents = items.reduce((sum, i) => sum + (i.totalPriceCents ?? 0), 0)
   const pricing = calculateOrderPricing(subtotalCents)
 
