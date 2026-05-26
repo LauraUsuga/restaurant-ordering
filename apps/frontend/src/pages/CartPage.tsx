@@ -125,7 +125,20 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
                         mb: 0.5,
                       }}
                     >
-                      {item.productId}
+                      <Typography
+                        sx={{
+                          fontFamily:
+                            '"Playfair Display", serif',
+                          fontSize: "1rem",
+                          mb: 0.5,
+                        }}
+                      >
+                        {
+                          typeof item.productId === "string"
+                            ? item.productId
+                            : item.productId.name
+                        }
+                      </Typography>
                     </Typography>
                     {item.selectedModifiers && item.selectedModifiers.length > 0 && (
                       <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}>

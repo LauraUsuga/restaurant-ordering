@@ -22,6 +22,7 @@ export default function OrderPage() {
 
   const [order, setOrder] = useState<Order | null>(null)
   const [timeline, setTimeline] = useState<TimelineEvent[]>([])
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const loadOrder = async () => {
     const res = await api.get(`/orders/${orderId}`)
@@ -33,6 +34,9 @@ export default function OrderPage() {
     setTimeline(res.data)
   }
 
+  const toggleExpand = (id: string) =>
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
+  
   useEffect(() => {
     if (!orderId) return
 
@@ -126,55 +130,33 @@ export default function OrderPage() {
           )}
 
           {timeline.map((event) => (
-            <Card
-              key={event.eventId}
-              sx={{
-                border: `1px solid ${theme.palette.divider}`,
-                background: "rgba(240,235,227,0.015)",
-              }}
-            >
+            <Card key={event.eventId} sx={{ border: `1px solid ${theme.palette.divider}`, background: "rgba(240,235,227,0.015)" }}>
               <CardContent>
-                {/* HEADER EVENT */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 500 }}>
-                    {event.type}
-                  </Typography>
-
-                  <Typography variant="caption" sx={{ opacity: 0.6 }}>
-                    {formatDate(event.timestamp)}
-                  </Typography>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, cursor: "pointer" }} onClick={() => toggleExpand(event.eventId)}>
+                  <Typography sx={{ fontWeight: 500 }}>{event.type}</Typography>
+                  <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+                    <Typography variant="caption" sx={{ opacity: 0.6 }}>{formatDate(event.timestamp)}</Typography>
+                    <Typography variant="caption" sx={{ color: theme.palette.primary.main }}>
+                      {expanded[event.eventId] ? "▲ collapse" : "▼ details"}
+                    </Typography>
+                  </Box>
                 </Box>
 
-                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                  Source: {event.source}
-                </Typography>
-
-                {/* PAYLOAD (cleaned visual, not JSON dump) */}
-                {event.payload && (
-                  <Box
-                    sx={{
-                      mt: 2,
-                      p: 1.5,
-                      borderRadius: "4px",
-                      background: "rgba(0,0,0,0.2)",
-                      fontSize: 12,
-                      fontFamily: "monospace",
-                      overflowX: "auto",
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {Object.entries(event.payload).map(([key, value]) => (
-                      <Typography key={key} variant="caption" sx={{ display: "block" }}>
-                        {key}: {String(value)}
-                      </Typography>
-                    ))}
-                  </Box>
+                {expanded[event.eventId] && (
+                  <>
+                    <Typography variant="caption" sx={{ opacity: 0.7, display: "block", mb: 1 }}>
+                      Source: {event.source} · correlationId: {event.correlationId}
+                    </Typography>
+                    {event.payload && (
+                      <Box sx={{ mt: 1, p: 1.5, borderRadius: "4px", background: "rgba(0,0,0,0.2)", fontSize: 12, fontFamily: "monospace", overflowX: "auto", color: theme.palette.text.secondary }}>
+                        {Object.entries(event.payload).map(([key, value]) => (
+                          <Typography key={key} variant="caption" sx={{ display: "block" }}>
+                            {key}: {String(value)}
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

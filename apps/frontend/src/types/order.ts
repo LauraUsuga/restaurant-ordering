@@ -1,19 +1,24 @@
 export type CartItem = {
   _id: string
-  productId: string
   quantity: number
   totalPriceCents: number
+  productId:
+  | string
+  | {
+    _id: string
+    name: string
+  }
   basePriceCents: number
   selectedModifiers?: { groupId: string; optionId: string; name: string; priceCents: number }[]
 }
- 
+
 export type Pricing = {
   subtotalCents: number
   taxCents: number
   serviceFeeCents: number
   totalCents: number
 }
- 
+
 export type Order = {
   _id: string
   userId: string
