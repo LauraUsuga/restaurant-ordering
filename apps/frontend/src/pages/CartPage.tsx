@@ -61,7 +61,7 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
   }
 
   const isEmpty = items.length === 0
-
+console.log({ items })
   return (
     <Layout cartCount={cartCount}>
       <Box sx={{ px: { xs: 3, md: 6 }, pt: 6, pb: 10, maxWidth: 900, mx: "auto" }}>
@@ -125,20 +125,7 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
                         mb: 0.5,
                       }}
                     >
-                      <Typography
-                        sx={{
-                          fontFamily:
-                            '"Playfair Display", serif',
-                          fontSize: "1rem",
-                          mb: 0.5,
-                        }}
-                      >
-                        {
-                          typeof item.productId === "string"
-                            ? item.productId
-                            : item.productId.name
-                        }
-                      </Typography>
+                      {item.productId?.name}
                     </Typography>
                     {item.selectedModifiers && item.selectedModifiers.length > 0 && (
                       <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}>

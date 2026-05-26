@@ -1,15 +1,20 @@
+export type ProductRef = {
+  _id: string
+  name: string
+}
+
 export type CartItem = {
   _id: string
   quantity: number
   totalPriceCents: number
-  productId:
-  | string
-  | {
-    _id: string
-    name: string
-  }
+  productId: ProductRef
   basePriceCents: number
-  selectedModifiers?: { groupId: string; optionId: string; name: string; priceCents: number }[]
+  selectedModifiers?: {
+    groupId: string
+    optionId: string
+    name: string
+    priceCents: number
+  }[]
 }
 
 export type Pricing = {
