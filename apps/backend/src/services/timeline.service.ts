@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid"
 import { TimelineEvent } from "../models/TimelineEvent"
+import { maskPII } from "./maskPII"
 
 type CreateEventInput = {
   orderId: string
@@ -7,7 +8,7 @@ type CreateEventInput = {
   type: string
   source: "web" | "api" | "worker"
   correlationId: string
-  payload: unknown
+  payload: Record<string, unknown>
 }
 
 export const createTimelineEvent = async ({
@@ -18,7 +19,15 @@ export const createTimelineEvent = async ({
   correlationId,
   payload
 }: CreateEventInput) => {
-  const event = await TimelineEvent.create({
+  const safePayload = maskPII(payload)
+
+  console.log("[timeline]", {
+    type,
+    orderId,
+    payload: safePayload
+  })
+
+  return TimelineEvent.create({
     eventId: uuid(),
     timestamp: new Date().toISOString(),
     orderId,
@@ -28,6 +37,4 @@ export const createTimelineEvent = async ({
     correlationId,
     payload
   })
-
-  return event
 }
