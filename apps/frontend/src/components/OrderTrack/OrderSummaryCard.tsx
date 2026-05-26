@@ -32,25 +32,35 @@ export default function OrderSummaryCard({ order, orderId }: Props) {
 
   return (
     <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
+
       <CardContent>
+
+        {/* HEADER */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+
+          {/* ORDER ID */}
           <Typography variant="h6">
             Order #{orderId}
           </Typography>
 
+          {/* STATUS */}
           <Chip
             label={order.status}
             color={getStatusColor(order.status) as any}
             size="small"
           />
+
         </Box>
 
         <Divider sx={{ mb: 2 }} />
 
+        {/* TOTAL */}
         <Typography sx={{ fontSize: "1.2rem", fontWeight: 500 }}>
           Total: ${(order.totalCents / 100).toFixed(2)}
         </Typography>
+
       </CardContent>
+
     </Card>
   )
 }

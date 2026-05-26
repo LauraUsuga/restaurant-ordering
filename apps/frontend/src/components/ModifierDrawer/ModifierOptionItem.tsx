@@ -1,12 +1,19 @@
 import { Box, Typography } from "@mui/material"
 import { isModifierSelected } from "../../utils/modifiers"
 
+interface Props {
+  option: any
+  group: any
+  selected: Record<string, any[]>
+  onToggle: (group: any, option: any) => void
+}
+
 export default function ModifierOptionItem({
   option,
   group,
   selected,
   onToggle,
-}: any) {
+}: Props) {
   const sel = isModifierSelected(selected, group.id, option.id)
 
   return (
@@ -32,6 +39,7 @@ export default function ModifierOptionItem({
         },
       }}
     >
+      {/* OPTION NAME */}
       <Typography
         variant="body2"
         sx={{
@@ -42,6 +50,7 @@ export default function ModifierOptionItem({
         {option.name}
       </Typography>
 
+      {/* EXTRA PRICE */}
       {option.priceCents > 0 && (
         <Typography variant="caption" sx={{ color: "primary.main" }}>
           +${(option.priceCents / 100).toFixed(2)}

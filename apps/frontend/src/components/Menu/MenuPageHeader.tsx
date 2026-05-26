@@ -13,6 +13,8 @@ export default function MenuPageHeader() {
       }}
     >
       <Box>
+
+        {/* SMALL LABEL */}
         <Typography
           variant="caption"
           sx={{
@@ -25,6 +27,7 @@ export default function MenuPageHeader() {
           SEASONAL MENU
         </Typography>
 
+        {/* MAIN TITLE */}
         <Typography
           variant="h2"
           sx={{
@@ -38,6 +41,7 @@ export default function MenuPageHeader() {
           </em>{" "}
           today?
         </Typography>
+
       </Box>
     </Box>
   )

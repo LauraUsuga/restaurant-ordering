@@ -15,13 +15,23 @@ export default function AppFooter() {
         borderTop: `0.5px solid ${theme.palette.divider}`,
       }}
     >
-      <Typography variant="caption" sx={{ color: theme.palette.text.disabled }}>
+
+      {/* BRAND MESSAGE */}
+      <Typography
+        variant="caption"
+        sx={{ color: theme.palette.text.disabled }}
+      >
         fork & fire — kitchen open
       </Typography>
 
-      <Typography variant="caption" sx={{ color: theme.palette.text.disabled }}>
+      {/* CREDIT */}
+      <Typography
+        variant="caption"
+        sx={{ color: theme.palette.text.disabled }}
+      >
         by Laura Usuga Quiñones
       </Typography>
+
     </Box>
   )
 }

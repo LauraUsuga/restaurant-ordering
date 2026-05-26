@@ -1,11 +1,18 @@
 import { Box, Typography, Chip, useTheme } from "@mui/material"
 
+interface Props {
+  product: any
+  hoveredId: string | null
+  setHoveredId: (id: string | null) => void
+  onClick: () => void
+}
+
 export default function ProductCard({
   product,
   hoveredId,
   setHoveredId,
   onClick,
-}: any) {
+}: Props) {
   const theme = useTheme()
 
   return (
@@ -27,6 +34,7 @@ export default function ProductCard({
         minHeight: 340,
       }}
     >
+
       {/* IMAGE */}
       <Box
         sx={{

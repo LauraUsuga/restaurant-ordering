@@ -1,11 +1,18 @@
 import { Box, Typography, Button, Divider, useTheme } from "@mui/material"
 
+interface Props {
+  pricing: any
+  itemsCount: number
+  checkingOut: boolean
+  onCheckout: () => void
+}
+
 export default function CartSummary({
   pricing,
   itemsCount,
   checkingOut,
   onCheckout,
-}: any) {
+}: Props) {
   const theme = useTheme()
 
   return (
@@ -17,25 +24,42 @@ export default function CartSummary({
         top: 80,
       }}
     >
-      <Typography sx={{ mb: 2 }}>Order summary</Typography>
 
+      {/* TITLE */}
+      <Typography sx={{ mb: 2 }}>
+        Order summary
+      </Typography>
+
+      {/* PRICING BREAKDOWN */}
       {[
         { label: "Subtotal", val: pricing.subtotalCents },
         { label: "Tax", val: pricing.taxCents },
         { label: "Service", val: pricing.serviceFeeCents },
       ].map((i) => (
-        <Box key={i.label} sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Box
+          key={i.label}
+          sx={{ display: "flex", justifyContent: "space-between" }}
+        >
           <Typography>{i.label}</Typography>
-          <Typography>${(i.val / 100).toFixed(2)}</Typography>
+          <Typography>
+            ${(i.val / 100).toFixed(2)}
+          </Typography>
         </Box>
       ))}
 
       <Divider sx={{ my: 2 }} />
 
-      <Typography sx={{ fontSize: "1.6rem", color: theme.palette.primary.main }}>
+      {/* TOTAL */}
+      <Typography
+        sx={{
+          fontSize: "1.6rem",
+          color: theme.palette.primary.main,
+        }}
+      >
         ${(pricing.totalCents / 100).toFixed(2)}
       </Typography>
 
+      {/* CHECKOUT BUTTON */}
       <Button
         fullWidth
         variant="contained"
@@ -44,6 +68,7 @@ export default function CartSummary({
       >
         {checkingOut ? "Placing order..." : "Place order"}
       </Button>
+
     </Box>
   )
 }

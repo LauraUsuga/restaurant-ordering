@@ -12,12 +12,19 @@ import { useModifiers } from "../../hooks/useModifiers"
 import { isModifierSelected } from "../../utils/modifiers"
 import type { ModifierGroup, ModifierOption } from "../../types/product/modifiers"
 
+interface Props {
+  open: boolean
+  product: any
+  onClose: () => void
+  onAdd: (product: any, mods: any[], qty: number) => void
+}
+
 export default function ModifierDrawer({
   open,
   product,
   onClose,
   onAdd,
-}: any) {
+}: Props) {
   const theme = useTheme()
 
   if (!product) return null
@@ -31,6 +38,14 @@ export default function ModifierDrawer({
     valid,
   } = useModifiers(product)
 
+  /**
+   * toggleMod
+   * Maneja selección/deselección de modifiers
+   *
+   * Respeta:
+   * - Máximo por grupo (group.max)
+   * - Evita duplicados
+   */
   const toggleMod = (group: ModifierGroup, opt: ModifierOption) => {
     const gid = group.id
     const current = selected[gid] || []
@@ -73,11 +88,20 @@ export default function ModifierDrawer({
     }
   }
 
+  /**
+   * handleAdd
+   * Construye payload final del producto
+   * y lo envía al carrito
+   */
   const handleAdd = () => {
     const allMods = Object.values(selected).flat()
+
     onAdd(product, allMods, qty)
+
+    // reset state local del drawer
     setSelected({})
     setQty(1)
+
     onClose()
   }
 
@@ -104,7 +128,7 @@ export default function ModifierDrawer({
             position: "relative",
           }}
         >
-          {/* X BUTTON */}
+          {/* CLOSE BUTTON */}
           <IconButton
             onClick={onClose}
             size="small"
@@ -120,6 +144,7 @@ export default function ModifierDrawer({
             <CloseIcon fontSize="small" />
           </IconButton>
 
+          {/* PRODUCT INFO */}
           <Typography variant="h5">{product.name}</Typography>
           <Typography variant="body2">{product.description}</Typography>
 
@@ -132,8 +157,11 @@ export default function ModifierDrawer({
         <Box sx={{ flex: 1, overflowY: "auto", p: 3 }}>
           {product.modifierGroups?.map((group: ModifierGroup) => (
             <Box key={group.id} sx={{ mb: 3 }}>
+
+              {/* GROUP NAME */}
               <Typography variant="h6">{group.name}</Typography>
 
+              {/* OPTIONS */}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {group.options.map((opt) => {
                   const sel = isModifierSelected(selected, group.id, opt.id)
@@ -146,9 +174,8 @@ export default function ModifierDrawer({
                         px: 2,
                         py: 1,
                         cursor: "pointer",
-                        border: `0.5px solid ${
-                          sel ? theme.palette.primary.main : theme.palette.divider
-                        }`,
+                        border: `0.5px solid ${sel ? theme.palette.primary.main : theme.palette.divider
+                          }`,
                       }}
                     >
                       {opt.name}
@@ -171,6 +198,7 @@ export default function ModifierDrawer({
             Add — ${(totalCents / 100).toFixed(2)}
           </Button>
         </Box>
+
       </Box>
     </Drawer>
   )

@@ -5,7 +5,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material"
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined"
 
 interface Props {
   item: any
@@ -21,7 +21,7 @@ export default function CartItemRow({
   onUpdateQty,
 }: Props) {
   const theme = useTheme()
-
+  
   const productName =
     typeof item.productId === "object"
       ? item.productId.name
@@ -38,9 +38,10 @@ export default function CartItemRow({
         gap: 3,
       }}
     >
-      {/* LEFT */}
+      {/* LEFT SECTION */}
       <Box sx={{ flex: 1 }}>
-        {/* NAME */}
+
+        {/* PRODUCT NAME */}
         <Typography sx={{ fontSize: "1rem", mb: 1 }}>
           {productName}
         </Typography>
@@ -49,7 +50,11 @@ export default function CartItemRow({
         {item.selectedModifiers?.length > 0 && (
           <Typography
             variant="caption"
-            sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}
+            sx={{
+              color: theme.palette.text.secondary,
+              display: "block",
+              mb: 1,
+            }}
           >
             {item.selectedModifiers.map((m: any) => m.name).join(", ")}
           </Typography>
@@ -66,9 +71,10 @@ export default function CartItemRow({
           ${(item.totalPriceCents / 100).toFixed(2)}
         </Typography>
 
-        {/* FOOT CONTROLS */}
+        {/* FOOT CONTROLS (QTY + DELETE) */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* QTY */}
+
+          {/* QUANTITY CONTROLS */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton
               size="small"
@@ -101,7 +107,7 @@ export default function CartItemRow({
             </IconButton>
           </Box>
 
-          {/* DELETE */}
+          {/* REMOVE ITEM */}
           <Tooltip title="Remove">
             <IconButton
               onClick={() => onRemove(item._id)}
@@ -117,6 +123,7 @@ export default function CartItemRow({
               <DeleteOutlineOutlinedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+
         </Box>
       </Box>
     </Box>

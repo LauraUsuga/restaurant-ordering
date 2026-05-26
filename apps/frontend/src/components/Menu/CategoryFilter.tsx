@@ -1,10 +1,16 @@
 import { Box, Typography, useTheme } from "@mui/material"
 
+interface Props {
+  categories: string[]
+  active: string
+  onChange: (category: string) => void
+}
+
 export default function CategoryFilter({
   categories,
   active,
   onChange,
-}: any) {
+}: Props) {
   const theme = useTheme()
 
   return (

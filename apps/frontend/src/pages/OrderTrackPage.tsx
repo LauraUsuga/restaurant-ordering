@@ -11,9 +11,9 @@ import type { Order } from "../types/order/order"
 import type { TimelineEvent } from "../types/timeline/timeline"
 import Layout from "../components/Layout/Layout"
 
-import OrderHeader from "../components/OrderTrack/OrderHeader"
 import OrderSummaryCard from "../components/OrderTrack/OrderSummaryCard"
 import TimelineItem from "../components/OrderTrack/TimelineItem"
+import OrdersHeader from "../components/Orders/OrdersHeader";
 
 export default function OrderTrackPage() {
   const { orderId } = useParams()
@@ -69,10 +69,14 @@ export default function OrderTrackPage() {
     loadInitial()
 
     const interval = setInterval(() => {
-      if (!stopRef.current) refresh()
+      if (stopRef.current) return
+      void refresh()
     }, 4000)
 
-    return () => clearInterval(interval)
+    return () => {
+      stopRef.current = true
+      clearInterval(interval)
+    }
   }, [orderId])
 
   const toggleExpand = (id: string) =>
@@ -113,7 +117,7 @@ export default function OrderTrackPage() {
       <Container sx={{ mt: 6, mb: 10, maxWidth: 800 }}>
 
         {/* HEADER */}
-        <OrderHeader />
+        <OrdersHeader />
 
         {/* SUMMARY */}
         <OrderSummaryCard order={order} orderId={orderId} />

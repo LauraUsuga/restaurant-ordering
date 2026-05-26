@@ -25,7 +25,10 @@ export default function TimelineItem({
 
   return (
     <Card sx={{ border: `1px solid ${theme.palette.divider}` }}>
+
       <CardContent>
+
+        {/* HEADER CLICKABLE */}
         <Box
           sx={{
             display: "flex",
@@ -35,10 +38,13 @@ export default function TimelineItem({
           }}
           onClick={onToggle}
         >
+
+          {/* EVENT TYPE */}
           <Typography sx={{ fontWeight: 500 }}>
             {event.type}
           </Typography>
 
+          {/* TIMESTAMP + TOGGLE */}
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
             <Typography variant="caption" sx={{ opacity: 0.6 }}>
               {formatDate(event.timestamp)}
@@ -51,10 +57,13 @@ export default function TimelineItem({
               {expanded ? "▲ collapse" : "▼ details"}
             </Typography>
           </Box>
+
         </Box>
 
+        {/* EXPANDED CONTENT */}
         {expanded && (
           <>
+            {/* METADATA */}
             <Typography
               variant="caption"
               sx={{ opacity: 0.7, display: "block", mb: 1 }}
@@ -62,6 +71,7 @@ export default function TimelineItem({
               Source: {event.source} · correlationId: {event.correlationId}
             </Typography>
 
+            {/* PAYLOAD */}
             {event.payload && (
               <Box
                 sx={{
@@ -72,7 +82,11 @@ export default function TimelineItem({
                 }}
               >
                 {Object.entries(event.payload).map(([key, value]) => (
-                  <Typography key={key} variant="caption" sx={{ display: "block" }}>
+                  <Typography
+                    key={key}
+                    variant="caption"
+                    sx={{ display: "block" }}
+                  >
                     {key}: {String(value)}
                   </Typography>
                 ))}
@@ -80,7 +94,9 @@ export default function TimelineItem({
             )}
           </>
         )}
+
       </CardContent>
+
     </Card>
   )
 }

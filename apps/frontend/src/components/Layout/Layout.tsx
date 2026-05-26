@@ -23,12 +23,15 @@ export default function Layout({
         background: theme.palette.background.default,
       }}
     >
+      {/* HEADER GLOBAL */}
       <AppHeader cartCount={cartCount} />
 
+      {/* CONTENIDO PRINCIPAL */}
       <Box component="main" sx={{ flex: 1 }}>
         {children}
       </Box>
 
+      {/* FOOTER GLOBAL */}
       <AppFooter />
     </Box>
   )
