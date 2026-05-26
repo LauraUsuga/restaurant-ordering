@@ -5,6 +5,7 @@ import {
   useTheme,
   Divider,
   IconButton,
+  CircularProgress,
 } from "@mui/material"
 import { useEffect, useState } from "react"
 import { api } from "../services/api"
@@ -23,11 +24,23 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
   const [items, setItems] = useState<CartItem[]>([])
   const [pricing, setPricing] = useState<Pricing | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const loadCart = async () => {
-    const res = await api.get("/cart/mock-user-1")
-    setItems(res.data.items)
-    setPricing(res.data.pricing)
+    try {
+      setLoading(true)
+      setError(null)
+
+      const res = await api.get("/cart/mock-user-1")
+
+      setItems(res.data.items)
+      setPricing(res.data.pricing)
+    } catch (err) {
+      setError("Failed to load cart")
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -60,8 +73,29 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
     }
   }
 
-  const isEmpty = items.length === 0
-console.log({ items })
+  const isEmpty = !loading && items.length === 0
+
+  if (loading) {
+    return (
+      <Layout cartCount={cartCount}>
+        <Box sx={{ px: 6, py: 6 }}>
+          <CircularProgress />
+          <Typography>Loading cart...</Typography>
+        </Box>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout cartCount={cartCount}>
+        <Box sx={{ px: 6, py: 6 }}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      </Layout>
+    )
+  }
+
   return (
     <Layout cartCount={cartCount}>
       <Box sx={{ px: { xs: 3, md: 6 }, pt: 6, pb: 10, maxWidth: 900, mx: "auto" }}>
@@ -97,104 +131,111 @@ console.log({ items })
         ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 360px" }, gap: 4, alignItems: "start" }}>
             <Box>
-              {items.map((item, i) => (
-                <Box
-                  key={item._id}
-                  sx={{
-                    p: 3,
-                    border: `0.5px solid ${theme.palette.divider}`,
-                    borderBottom: i < items.length - 1 ? "none" : `0.5px solid ${theme.palette.divider}`,
-                    display: "flex",
-                    gap: 3,
-                    alignItems: "flex-start",
-                    transition: "background 0.15s",
-                    "&:hover": { background: "rgba(240,235,227,0.02)" },
-                    animation: `slideIn 0.3s ease both`,
-                    animationDelay: `${i * 0.06}s`,
-                    "@keyframes slideIn": {
-                      from: { opacity: 0, transform: "translateX(-8px)" },
-                      to: { opacity: 1, transform: "translateX(0)" },
-                    },
-                  }}
-                >
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      sx={{
-                        fontFamily: '"Playfair Display", serif',
-                        fontSize: "1rem",
-                        mb: 0.5,
-                      }}
-                    >
-                      {item.productId?.name}
-                    </Typography>
-                    {item.selectedModifiers && item.selectedModifiers.length > 0 && (
-                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}>
-                        {item.selectedModifiers.map((m) => m.name).join(", ")}
-                      </Typography>
-                    )}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => updateQty(item._id, item.quantity - 1)}
+              {items.map((item, i) => {
+                const productName =
+                  typeof item.productId === "object"
+                    ? item.productId.name
+                    : "Unknown product"
+
+                return (
+                  <Box
+                    key={item._id}
+                    sx={{
+                      p: 3,
+                      border: `0.5px solid ${theme.palette.divider}`,
+                      borderBottom: i < items.length - 1 ? "none" : `0.5px solid ${theme.palette.divider}`,
+                      display: "flex",
+                      gap: 3,
+                      alignItems: "flex-start",
+                      transition: "background 0.15s",
+                      "&:hover": { background: "rgba(240,235,227,0.02)" },
+                      animation: `slideIn 0.3s ease both`,
+                      animationDelay: `${i * 0.06}s`,
+                      "@keyframes slideIn": {
+                        from: { opacity: 0, transform: "translateX(-8px)" },
+                        to: { opacity: 1, transform: "translateX(0)" },
+                      },
+                    }}
+                  >
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
                         sx={{
-                          width: 24,
-                          height: 24,
-                          border: `0.5px solid ${theme.palette.divider}`,
-                          borderRadius: "2px",
-                          color: theme.palette.text.secondary,
-                          fontSize: 14,
+                          fontFamily: '"Playfair Display", serif',
+                          fontSize: "1rem",
+                          mb: 0.5,
                         }}
                       >
-                        <span style={{ lineHeight: 1 }}>−</span>
-                      </IconButton>
-                      <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 20, textAlign: "center" }}>
-                        {item.quantity}
+                        {productName}
                       </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => updateQty(item._id, item.quantity + 1)}
+                      {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}>
+                          {item.selectedModifiers.map((m) => m.name).join(", ")}
+                        </Typography>
+                      )}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => updateQty(item._id, item.quantity - 1)}
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            border: `0.5px solid ${theme.palette.divider}`,
+                            borderRadius: "2px",
+                            color: theme.palette.text.secondary,
+                            fontSize: 14,
+                          }}
+                        >
+                          <span style={{ lineHeight: 1 }}>−</span>
+                        </IconButton>
+                        <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 20, textAlign: "center" }}>
+                          {item.quantity}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => updateQty(item._id, item.quantity + 1)}
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            border: `0.5px solid ${theme.palette.divider}`,
+                            borderRadius: "2px",
+                            color: theme.palette.text.secondary,
+                            fontSize: 14,
+                          }}
+                        >
+                          <span style={{ lineHeight: 1 }}>+</span>
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                      <Typography
                         sx={{
-                          width: 24,
-                          height: 24,
-                          border: `0.5px solid ${theme.palette.divider}`,
-                          borderRadius: "2px",
-                          color: theme.palette.text.secondary,
-                          fontSize: 14,
+                          fontFamily: '"Playfair Display", serif',
+                          fontStyle: "italic",
+                          color: theme.palette.primary.main,
+                          fontSize: "1.1rem",
                         }}
                       >
-                        <span style={{ lineHeight: 1 }}>+</span>
-                      </IconButton>
+                        ${(item.totalPriceCents / 100).toFixed(2)}
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={() => removeItem(item._id)}
+                        sx={{
+                          color: theme.palette.text.disabled,
+                          fontSize: "0.65rem",
+                          letterSpacing: "0.08em",
+                          p: 0,
+                          minWidth: 0,
+                          "&:hover": { color: "#C0392B", background: "transparent" },
+                        }}
+                      >
+                        Remove
+                      </Button>
                     </Box>
                   </Box>
-
-                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-                    <Typography
-                      sx={{
-                        fontFamily: '"Playfair Display", serif',
-                        fontStyle: "italic",
-                        color: theme.palette.primary.main,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      ${(item.totalPriceCents / 100).toFixed(2)}
-                    </Typography>
-                    <Button
-                      size="small"
-                      onClick={() => removeItem(item._id)}
-                      sx={{
-                        color: theme.palette.text.disabled,
-                        fontSize: "0.65rem",
-                        letterSpacing: "0.08em",
-                        p: 0,
-                        minWidth: 0,
-                        "&:hover": { color: "#C0392B", background: "transparent" },
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </Box>
-                </Box>
-              ))}
+                )
+              })}
             </Box>
 
             {pricing && (

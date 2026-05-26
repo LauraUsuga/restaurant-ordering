@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MenuPage from "./pages/MenuPage";
 import CartPage from "./pages/CartPage";
-import OrderPage from "./pages/OrderPage";
 import OrdersPage from "./pages/OrdersPage";
+import OrderTrackPage from "./pages/OrderTrackPage";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MenuPage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/orders/:orderId" element={<OrderPage />} />
+        <Route path="/orders/:orderId" element={<OrderTrackPage />} />
         <Route path="/orders" element={<OrdersPage />}
         />
       </Routes>

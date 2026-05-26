@@ -10,6 +10,8 @@ import {
   TextField,
   MenuItem,
   Pagination,
+  CircularProgress,
+  Alert,
 } from "@mui/material"
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
@@ -22,30 +24,35 @@ export default function OrdersPage() {
   const navigate = useNavigate()
 
   const [orders, setOrders] = useState<Order[]>([])
-
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-
   const [sort, setSort] = useState<"desc" | "asc">("desc")
-
   const [search, setSearch] = useState("")
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const limit = 5
 
   /**
-   * Load orders from backend
+   * Load orders
    */
   const loadOrders = async () => {
-    const res = await api.get(`/orders/user/mock-user-1`, {
-      params: {
-        page,
-        limit,
-        sort,
-      },
-    })
+    try {
+      setLoading(true)
+      setError(null)
 
-    setOrders(res.data.orders)
-    setTotalPages(res.data.pagination.totalPages)
+      const res = await api.get(`/orders/user/mock-user-1`, {
+        params: { page, limit, sort },
+      })
+
+      setOrders(res.data.orders)
+      setTotalPages(res.data.pagination.totalPages)
+    } catch (err) {
+      setError("Failed to load orders")
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -53,9 +60,7 @@ export default function OrdersPage() {
   }, [page, sort])
 
   /**
-   * Filter (client-side)
-   * - order number (id)
-   * - product name (if exists in items)
+   * FILTER (client-side)
    */
   const filteredOrders = useMemo(() => {
     if (!search) return orders
@@ -92,37 +97,26 @@ export default function OrdersPage() {
 
   return (
     <Layout>
-      <Box
-        sx={{
-          px: { xs: 3, md: 6 },
-          py: 6,
-          maxWidth: 900,
-          mx: "auto",
-        }}
-      >
+      <Box sx={{ px: { xs: 3, md: 6 }, py: 6, maxWidth: 900, mx: "auto" }}>
+
         {/* HEADER */}
         <Typography variant="h3" sx={{ mb: 1 }}>
           My orders
         </Typography>
 
-        <Typography
-          sx={{
-            mb: 4,
-            color: theme.palette.text.secondary,
-          }}
-        >
+        <Typography sx={{ mb: 4, color: theme.palette.text.secondary }}>
           Review your order history and track live status
         </Typography>
 
+        {/* ERROR */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
         {/* CONTROLS */}
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            mb: 3,
-            flexWrap: "wrap",
-          }}
-        >
+        <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
           <TextField
             size="small"
             label="Search order / product"
@@ -138,90 +132,83 @@ export default function OrdersPage() {
             size="small"
             label="Sort"
             value={sort}
-            onChange={(e) =>
-              setSort(e.target.value as any)
-            }
+            onChange={(e) => setSort(e.target.value as any)}
           >
-            <MenuItem value="desc">
-              Newest first
-            </MenuItem>
-            <MenuItem value="asc">
-              Oldest first
-            </MenuItem>
+            <MenuItem value="desc">Newest first</MenuItem>
+            <MenuItem value="asc">Oldest first</MenuItem>
           </TextField>
         </Box>
 
-        {/* LIST */}
-        {!filteredOrders.length ? (
-          <Typography>No orders found</Typography>
+        {/* LOADING */}
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+            <CircularProgress />
+          </Box>
         ) : (
-          <Stack spacing={2}>
-            {filteredOrders.map((order) => (
-              <Card
-                key={order._id}
-                sx={{
-                  border: `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
+          <>
+            {/* EMPTY */}
+            {!filteredOrders.length ? (
+              <Typography>No orders found</Typography>
+            ) : (
+              <Stack spacing={2}>
+                {filteredOrders.map((order) => (
+                  <Card
+                    key={order._id}
+                    sx={{ border: `1px solid ${theme.palette.divider}` }}
                   >
-                    <Box>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Order #{order._id.slice(-6)}
+                    <CardContent>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 2,
+                        }}
+                      >
+                        <Box>
+                          <Typography sx={{ fontWeight: 600 }}>
+                            Order #{order._id.slice(-6)}
+                          </Typography>
+
+                          <Typography variant="caption">
+                            {new Date(order.createdAt ?? "").toLocaleString()}
+                          </Typography>
+                        </Box>
+
+                        <Chip
+                          label={order.status}
+                          color={getStatusColor(order.status) as any}
+                        />
+                      </Box>
+
+                      <Typography sx={{ mb: 2 }}>
+                        Total ${(order.totalCents / 100).toFixed(2)}
                       </Typography>
 
-                      <Typography variant="caption">
-                        {new Date(
-                          order.createdAt ?? ""
-                        ).toLocaleString()}
-                      </Typography>
-                    </Box>
-
-                    <Chip
-                      label={order.status}
-                      color={
-                        getStatusColor(
-                          order.status
-                        ) as any
-                      }
-                    />
-                  </Box>
-
-                  <Typography sx={{ mb: 2 }}>
-                    Total: $
-                    {(order.totalCents / 100).toFixed(2)}
-                  </Typography>
-
-                  <Button
-                    variant="outlined"
-                    onClick={() =>
-                      navigate(`/orders/${order._id}`)
-                    }
-                  >
-                    Track order
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
+                      <Button
+                        variant="outlined"
+                        onClick={() => navigate(`/orders/${order._id}`)}
+                      >
+                        Track order
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </>
         )}
 
         {/* PAGINATION */}
-        <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(_, value) => setPage(value)}
-          />
-        </Box>
+        {!loading && (
+          <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+            />
+          </Box>
+        )}
       </Box>
     </Layout>
   )
