@@ -1,5 +1,5 @@
 import { calculateOrderPricing } from "../services/order-pricing.service";
-import { calculateItemPrice } from "../services/pricing.services";
+import { calculateItemPrice } from "../services/pricing.service";
 import { createTimelineEvent } from "../services/timeline.service";
 import { CartItem } from "../models/CartItem"
 import { Product } from "../models/Product"
