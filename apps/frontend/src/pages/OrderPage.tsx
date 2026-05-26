@@ -3,34 +3,33 @@ import {
   Typography,
   Card,
   CardContent,
-  Stack
+  Stack,
+  Chip,
+  Box,
+  Divider,
+  useTheme,
 } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { api } from "../services/api"
 import type { Order } from "../types/order"
 import type { TimelineEvent } from "../types/timeline"
+import Layout from "./Layout";
 
 export default function OrderPage() {
   const { orderId } = useParams()
+  const theme = useTheme()
 
-  const [order, setOrder] =
-    useState<Order | null>(null)
-
-  const [timeline, setTimeline] =
-    useState<TimelineEvent[]>([])
+  const [order, setOrder] = useState<Order | null>(null)
+  const [timeline, setTimeline] = useState<TimelineEvent[]>([])
 
   const loadOrder = async () => {
-    const res = await api.get(
-      `/orders/${orderId}`
-    )
+    const res = await api.get(`/orders/${orderId}`)
     setOrder(res.data)
   }
 
   const loadTimeline = async () => {
-    const res = await api.get(
-      `/orders/${orderId}/timeline`
-    )
+    const res = await api.get(`/orders/${orderId}/timeline`)
     setTimeline(res.data)
   }
 
@@ -48,65 +47,140 @@ export default function OrderPage() {
     return () => clearInterval(interval)
   }, [orderId])
 
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleString()
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "completed":
+        return "success"
+      case "pending":
+        return "warning"
+      case "cancelled":
+        return "error"
+      default:
+        return "default"
+    }
+  }
+
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4">
-        Order Status
-      </Typography>
+    <Layout>
+      <Container sx={{ mt: 6, mb: 10, maxWidth: 800 }}>
+        {/* HEADER */}
+        <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+          Order tracking
+        </Typography>
 
-      {order && (
-        <Card sx={{ mt: 2 }}>
-          <CardContent>
-            <Typography>
-              Status: {order.status}
-            </Typography>
+        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 3 }}>
+          Live updates of your order status
+        </Typography>
 
-            <Typography>
-              Total: $
-              {(order.totalCents / 100).toFixed(2)}
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
-
-      <Typography variant="h5" sx={{ mt: 4 }}>
-        Timeline
-      </Typography>
-
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        {timeline.map((event) => (
-          <Card key={event.eventId}>
+        {/* ORDER CARD */}
+        {order && (
+          <Card
+            sx={{
+              mb: 4,
+              border: `1px solid ${theme.palette.divider}`,
+              background: "rgba(240,235,227,0.02)",
+            }}
+          >
             <CardContent>
-              <Typography>
-                {event.type}
-              </Typography>
-
-              <Typography variant="caption">
-                {new Date(
-                  event.timestamp
-                ).toLocaleString()}
-              </Typography>
-
-              <Typography sx={{ mt: 1 }}>
-                Source: {event.source}
-              </Typography>
-
-              <pre
-                style={{
-                  fontSize: 12,
-                  marginTop: 10
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
                 }}
               >
-                {JSON.stringify(
-                  event.payload,
-                  null,
-                  2
-                )}
-              </pre>
+                <Typography variant="h6">
+                  Order #{orderId}
+                </Typography>
+
+                <Chip
+                  label={order.status}
+                  color={getStatusColor(order.status) as any}
+                  size="small"
+                />
+              </Box>
+
+              <Divider sx={{ mb: 2 }} />
+
+              <Typography sx={{ fontSize: "1.2rem", fontWeight: 500 }}>
+                Total: ${(order.totalCents / 100).toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
-        ))}
-      </Stack>
-    </Container>
+        )}
+
+        {/* TIMELINE */}
+        <Typography variant="h5" sx={{ mb: 2 }}>
+          Activity
+        </Typography>
+
+        <Stack spacing={2}>
+          {timeline.length === 0 && (
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+              Waiting for updates...
+            </Typography>
+          )}
+
+          {timeline.map((event) => (
+            <Card
+              key={event.eventId}
+              sx={{
+                border: `1px solid ${theme.palette.divider}`,
+                background: "rgba(240,235,227,0.015)",
+              }}
+            >
+              <CardContent>
+                {/* HEADER EVENT */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 500 }}>
+                    {event.type}
+                  </Typography>
+
+                  <Typography variant="caption" sx={{ opacity: 0.6 }}>
+                    {formatDate(event.timestamp)}
+                  </Typography>
+                </Box>
+
+                <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                  Source: {event.source}
+                </Typography>
+
+                {/* PAYLOAD (cleaned visual, not JSON dump) */}
+                {event.payload && (
+                  <Box
+                    sx={{
+                      mt: 2,
+                      p: 1.5,
+                      borderRadius: "4px",
+                      background: "rgba(0,0,0,0.2)",
+                      fontSize: 12,
+                      fontFamily: "monospace",
+                      overflowX: "auto",
+                      color: theme.palette.text.secondary,
+                    }}
+                  >
+                    {Object.entries(event.payload).map(([key, value]) => (
+                      <Typography key={key} variant="caption" sx={{ display: "block" }}>
+                        {key}: {String(value)}
+                      </Typography>
+                    ))}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+      </Container>
+    </Layout>
   )
 }

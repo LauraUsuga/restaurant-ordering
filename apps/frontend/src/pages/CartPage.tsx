@@ -1,38 +1,31 @@
 import {
-  Container,
+  Box,
   Typography,
-  Card,
-  CardContent,
   Button,
-  Stack
+  useTheme,
+  Divider,
+  IconButton,
 } from "@mui/material"
 import { useEffect, useState } from "react"
 import { api } from "../services/api"
 import { useNavigate } from "react-router-dom"
+import type { CartItem, Pricing } from "../types/order";
+import Layout from "./Layout";
 
-type CartItem = {
-  _id: string
-  productId: string
-  quantity: number
-  totalPriceCents: number
+interface CartPageProps {
+  onCartChange?: () => void
+  cartCount?: number
 }
 
-type Pricing = {
-  subtotalCents: number
-  taxCents: number
-  serviceFeeCents: number
-  totalCents: number
-}
-
-export default function CartPage() {
+export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps) {
+  const theme = useTheme()
+  const navigate = useNavigate()
   const [items, setItems] = useState<CartItem[]>([])
   const [pricing, setPricing] = useState<Pricing | null>(null)
-
-  const navigate = useNavigate()
+  const [checkingOut, setCheckingOut] = useState(false)
 
   const loadCart = async () => {
     const res = await api.get("/cart/mock-user-1")
-
     setItems(res.data.items)
     setPricing(res.data.pricing)
   }
@@ -44,88 +37,232 @@ export default function CartPage() {
   const removeItem = async (id: string) => {
     await api.delete(`/cart/items/${id}`)
     await loadCart()
+    onCartChange?.()
+  }
+
+  const updateQty = async (id: string, qty: number) => {
+    if (qty < 1) return removeItem(id)
+    await api.patch(`/cart/items/${id}`, { quantity: qty })
+    await loadCart()
   }
 
   const checkout = async () => {
-    const res = await api.post(
-      "/orders",
-      {
-        userId: "mock-user-1",
-        correlationId: crypto.randomUUID()
-      },
-      {
-        headers: {
-          "Idempotency-Key": crypto.randomUUID()
-        }
-      }
-    )
-
-    navigate(`/orders/${res.data.orderId}`)
+    setCheckingOut(true)
+    try {
+      const res = await api.post(
+        "/orders",
+        { userId: "mock-user-1", correlationId: crypto.randomUUID() },
+        { headers: { "Idempotency-Key": crypto.randomUUID() } }
+      )
+      navigate(`/orders/${res.data.orderId}`)
+    } finally {
+      setCheckingOut(false)
+    }
   }
 
+  const isEmpty = items.length === 0
+
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4">
-        Cart
-      </Typography>
+    <Layout cartCount={cartCount}>
+      <Box sx={{ px: { xs: 3, md: 6 }, pt: 6, pb: 10, maxWidth: 900, mx: "auto" }}>
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="caption" sx={{ color: theme.palette.primary.main, letterSpacing: "0.16em", display: "block", mb: 1.5 }}>
+            YOUR ORDER
+          </Typography>
+          <Typography variant="h2" sx={{ fontSize: { xs: "2rem", md: "2.8rem" } }}>
+            Review &{" "}
+            <em style={{ color: theme.palette.primary.main }}>checkout</em>
+          </Typography>
+        </Box>
 
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        {items.map((item) => (
-          <Card key={item._id}>
-            <CardContent>
-              <Typography>
-                Product: {item.productId}
-              </Typography>
+        {isEmpty ? (
+          <Box
+            sx={{
+              border: `0.5px solid ${theme.palette.divider}`,
+              p: 8,
+              textAlign: "center",
+              borderRadius: "2px",
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 1.5, color: theme.palette.text.secondary, fontSize: "1.2rem" }}>
+              Your cart is empty
+            </Typography>
+            <Typography variant="body2" sx={{ color: theme.palette.text.disabled, mb: 4 }}>
+              Head back to the menu and find something you love
+            </Typography>
+            <Button variant="outlined" color="primary" onClick={() => navigate("/")}>
+              Browse menu
+            </Button>
+          </Box>
+        ) : (
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 360px" }, gap: 4, alignItems: "start" }}>
+            <Box>
+              {items.map((item, i) => (
+                <Box
+                  key={item._id}
+                  sx={{
+                    p: 3,
+                    border: `0.5px solid ${theme.palette.divider}`,
+                    borderBottom: i < items.length - 1 ? "none" : `0.5px solid ${theme.palette.divider}`,
+                    display: "flex",
+                    gap: 3,
+                    alignItems: "flex-start",
+                    transition: "background 0.15s",
+                    "&:hover": { background: "rgba(240,235,227,0.02)" },
+                    animation: `slideIn 0.3s ease both`,
+                    animationDelay: `${i * 0.06}s`,
+                    "@keyframes slideIn": {
+                      from: { opacity: 0, transform: "translateX(-8px)" },
+                      to: { opacity: 1, transform: "translateX(0)" },
+                    },
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      sx={{
+                        fontFamily: '"Playfair Display", serif',
+                        fontSize: "1rem",
+                        mb: 0.5,
+                      }}
+                    >
+                      {item.productId}
+                    </Typography>
+                    {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: "block", mb: 1 }}>
+                        {item.selectedModifiers.map((m) => m.name).join(", ")}
+                      </Typography>
+                    )}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => updateQty(item._id, item.quantity - 1)}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          border: `0.5px solid ${theme.palette.divider}`,
+                          borderRadius: "2px",
+                          color: theme.palette.text.secondary,
+                          fontSize: 14,
+                        }}
+                      >
+                        <span style={{ lineHeight: 1 }}>−</span>
+                      </IconButton>
+                      <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 20, textAlign: "center" }}>
+                        {item.quantity}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => updateQty(item._id, item.quantity + 1)}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          border: `0.5px solid ${theme.palette.divider}`,
+                          borderRadius: "2px",
+                          color: theme.palette.text.secondary,
+                          fontSize: 14,
+                        }}
+                      >
+                        <span style={{ lineHeight: 1 }}>+</span>
+                      </IconButton>
+                    </Box>
+                  </Box>
 
-              <Typography>
-                Qty: {item.quantity}
-              </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                    <Typography
+                      sx={{
+                        fontFamily: '"Playfair Display", serif',
+                        fontStyle: "italic",
+                        color: theme.palette.primary.main,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      ${(item.totalPriceCents / 100).toFixed(2)}
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={() => removeItem(item._id)}
+                      sx={{
+                        color: theme.palette.text.disabled,
+                        fontSize: "0.65rem",
+                        letterSpacing: "0.08em",
+                        p: 0,
+                        minWidth: 0,
+                        "&:hover": { color: "#C0392B", background: "transparent" },
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
 
-              <Typography>
-                ${(item.totalPriceCents / 100).toFixed(2)}
-              </Typography>
-
-              <Button
-                color="error"
-                onClick={() => removeItem(item._id)}
+            {pricing && (
+              <Box
+                sx={{
+                  border: `0.5px solid ${theme.palette.divider}`,
+                  p: 3,
+                  position: "sticky",
+                  top: 80,
+                }}
               >
-                Remove
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
+                <Typography variant="h6" sx={{ mb: 2.5, color: theme.palette.text.secondary }}>
+                  Order summary
+                </Typography>
 
-      {pricing && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography>
-              Subtotal: ${(pricing.subtotalCents / 100).toFixed(2)}
-            </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2 }}>
+                  {[
+                    { label: "Subtotal", val: pricing.subtotalCents },
+                    { label: "Tax (8%)", val: pricing.taxCents },
+                    { label: "Service (5%)", val: pricing.serviceFeeCents },
+                  ].map(({ label, val }) => (
+                    <Box key={label} sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                        {label}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                        ${(val / 100).toFixed(2)}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
 
-            <Typography>
-              Tax: ${(pricing.taxCents / 100).toFixed(2)}
-            </Typography>
+                <Divider sx={{ mb: 2 }} />
 
-            <Typography>
-              Service: ${(pricing.serviceFeeCents / 100).toFixed(2)}
-            </Typography>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 3 }}>
+                  <Typography sx={{ fontFamily: '"Playfair Display", serif', fontSize: "1.1rem" }}>
+                    Total
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontSize: "1.6rem",
+                      fontStyle: "italic",
+                      color: theme.palette.primary.main,
+                    }}
+                  >
+                    ${(pricing.totalCents / 100).toFixed(2)}
+                  </Typography>
+                </Box>
 
-            <Typography variant="h6">
-              Total: ${(pricing.totalCents / 100).toFixed(2)}
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disabled={!items.length || checkingOut}
+                  onClick={checkout}
+                  sx={{ py: 1.5 }}
+                >
+                  {checkingOut ? "Placing order..." : "Place order"}
+                </Button>
 
-      <Button
-        variant="contained"
-        sx={{ mt: 3 }}
-        onClick={checkout}
-        disabled={!items.length}
-      >
-        Checkout
-      </Button>
-    </Container>
+                <Typography variant="caption" sx={{ color: theme.palette.text.disabled, display: "block", mt: 1.5, textAlign: "center" }}>
+                  Pricing calculated server-side
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
+    </Layout>
   )
 }
