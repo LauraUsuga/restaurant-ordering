@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react"
 import { api } from "../services/api"
 import { useNavigate } from "react-router-dom"
-import Layout from "../layouts/Layout";
+import Layout from "../components/Layout/Layout";
 import type { CartItem } from "../types/order/cart";
 import type { Pricing } from "../types/order/pricing";
 

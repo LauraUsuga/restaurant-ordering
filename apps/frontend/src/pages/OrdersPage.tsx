@@ -15,7 +15,7 @@ import {
 } from "@mui/material"
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import Layout from "../layouts/Layout"
+import Layout from "../components/Layout/Layout"
 import { api } from "../services/api"
 import type { Order } from "../types/order/order"
 

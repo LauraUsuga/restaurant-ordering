@@ -11,7 +11,7 @@ import { useEffect, useState, useMemo } from "react"
 import { api } from "../services/api"
 import ModifierDrawer from "../components/ModifierDrawer/ModifierDrawer"
 import type { Product } from "../types/product/product"
-import Layout from "../layouts/Layout"
+import Layout from "../components/Layout/Layout"
 
 interface MenuPageProps {
   onCartChange?: () => void
