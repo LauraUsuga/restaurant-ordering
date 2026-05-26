@@ -7,32 +7,64 @@ import { createTimelineEvent } from "../services/timeline.service";
 
 // POST /orders
 export const createOrder = async (req: any, res: any) => {
-  const idempotencyKey = req.headers["idempotency-key"]
-  const { userId, correlationId } = req.body
+  const idempotencyKey =
+    req.headers["idempotency-key"]
+
+  const { userId, correlationId } =
+    req.body
 
   if (idempotencyKey) {
-    const existing = await Idempotency.findOne({ key: idempotencyKey })
-    if (existing) return res.status(202).json({ orderId: existing.orderId })
+    const existing =
+      await Idempotency.findOne({
+        key: idempotencyKey
+      })
+
+    if (existing) {
+      return res.status(202).json({
+        orderId: existing.orderId
+      })
+    }
   }
 
-  const cartItems = await CartItem.find({ userId })
-  if (!cartItems.length) return res.status(400).json({ error: "Cart is empty" })
+  const cartItems =
+    await CartItem.find({ userId })
 
-  const subtotalCents = cartItems.reduce((s, i) => s + (i.totalPriceCents ?? 0), 0)
-  const pricing = calculateOrderPricing(subtotalCents)
+  if (!cartItems.length) {
+    return res.status(400).json({
+      error: "Cart is empty"
+    })
+  }
 
-  const order = await Order.create({
-    userId,
-    status: "PENDING",
-    items: cartItems,
-    ...pricing
+  const subtotalCents =
+    cartItems.reduce(
+      (s, i) =>
+        s + (i.totalPriceCents ?? 0),
+      0
+    )
+
+  const pricing =
+    calculateOrderPricing(
+      subtotalCents
+    )
+
+  const order =
+    await Order.create({
+      userId,
+      status: "PENDING",
+      items: cartItems,
+      ...pricing
+    })
+
+  if (idempotencyKey) {
+    await Idempotency.create({
+      key: idempotencyKey,
+      orderId: order._id.toString()
+    })
+  }
+
+  await CartItem.deleteMany({
+    userId
   })
-
-  if (idempotencyKey) {
-    await Idempotency.create({ key: idempotencyKey, orderId: order._id.toString() })
-  }
-
-  await CartItem.deleteMany({ userId })
 
   await createTimelineEvent({
     orderId: order._id.toString(),
@@ -40,10 +72,66 @@ export const createOrder = async (req: any, res: any) => {
     type: "ORDER_PLACED",
     source: "web",
     correlationId,
-    payload: { status: "PENDING", ...pricing }
+    payload: {
+      status: "PENDING",
+      ...pricing
+    }
   })
 
-  return res.status(202).json({ orderId: order._id })
+  // AUTO STATUS FLOW
+  const orderId =
+    order._id.toString()
+
+  const statusFlow = [
+    {
+      delay: 5000,
+      from: "PENDING",
+      to: "PREPARING"
+    },
+    {
+      delay: 10000,
+      from: "PREPARING",
+      to: "ON_THE_WAY"
+    },
+    {
+      delay: 15000,
+      from: "ON_THE_WAY",
+      to: "DELIVERED"
+    }
+  ]
+
+  statusFlow.forEach(
+    ({ delay, from, to }) => {
+      setTimeout(async () => {
+        await Order.findByIdAndUpdate(
+          orderId,
+          {
+            status: to
+          }
+        )
+
+        await createTimelineEvent({
+          orderId,
+          userId,
+          type:
+            "ORDER_STATUS_CHANGED",
+          source: "worker",
+          correlationId,
+          payload: {
+            from,
+            to
+          }
+        })
+        console.log(
+          `Order ${orderId}: ${from} → ${to}`
+        )
+      }, delay)
+    }
+  )
+
+  return res.status(202).json({
+    orderId: order._id
+  })
 }
 
 // PATCH /orders/:orderId/status  — para workers que cambian estado
