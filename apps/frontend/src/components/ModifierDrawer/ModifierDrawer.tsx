@@ -175,9 +175,20 @@ export default function ModifierDrawer({
                         cursor: "pointer",
                         border: `0.5px solid ${sel ? theme.palette.primary.main : theme.palette.divider
                           }`,
+                        borderRadius: "4px",
                       }}
                     >
-                      {opt.name}
+                      <Box sx={{ display: "column", width: "100%" }}>
+                        <Typography variant="body2">
+                          {opt.name}
+                        </Typography>
+
+                        {opt.priceCents > 0 && (
+                          <Typography variant="caption" sx={{ color: theme.palette.primary.main }}>
+                            +${(opt.priceCents / 100).toFixed(2)}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
                   )
                 })}
