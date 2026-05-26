@@ -5,6 +5,7 @@ export type ProductRef = {
 
 export type CartItem = {
   _id: string
+  productName: string
   quantity: number
   totalPriceCents: number
   productId: ProductRef
