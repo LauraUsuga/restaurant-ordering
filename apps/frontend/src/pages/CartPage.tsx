@@ -26,6 +26,14 @@ export default function CartPage() {
     checkout,
   } = useCart()
 
+  const handleCheckout = async () => {
+    const orderId = await checkout()
+
+    if (orderId) {
+      navigate(`/orders/${orderId}`)
+    }
+  }
+
   const isEmpty = !loading && items.length === 0
 
   if (loading) {
@@ -105,7 +113,7 @@ export default function CartPage() {
                 pricing={pricing}
                 itemsCount={items.length}
                 checkingOut={checkingOut}
-                onCheckout={checkout}
+                onCheckout={handleCheckout}
               />
             )}
           </Box>

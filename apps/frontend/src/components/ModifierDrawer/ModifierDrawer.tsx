@@ -27,8 +27,6 @@ export default function ModifierDrawer({
 }: Props) {
   const theme = useTheme()
 
-  if (!product) return null
-
   const {
     selected,
     setSelected,
@@ -38,6 +36,7 @@ export default function ModifierDrawer({
     valid,
   } = useModifiers(product)
 
+  if (!product) return null
   /**
    * toggleMod
    * Maneja selección/deselección de modifiers

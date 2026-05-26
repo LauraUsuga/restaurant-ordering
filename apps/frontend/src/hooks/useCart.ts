@@ -58,6 +58,7 @@ export function useCart(onCartChange?: () => void) {
         "/orders",
         {
           userId: "mock-user-1",
+          items,
           correlationId: crypto.randomUUID(),
         },
         {
@@ -66,6 +67,10 @@ export function useCart(onCartChange?: () => void) {
           },
         }
       )
+
+      const orderId = res.data._id ?? res.data.orderId
+
+      return orderId
 
       return res.data.orderId
     } finally {
