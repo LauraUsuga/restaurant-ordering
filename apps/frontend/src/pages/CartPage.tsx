@@ -10,8 +10,9 @@ import {
 import { useEffect, useState } from "react"
 import { api } from "../services/api"
 import { useNavigate } from "react-router-dom"
-import type { CartItem, Pricing } from "../types/order";
-import Layout from "./Layout";
+import Layout from "../layouts/Layout";
+import type { CartItem } from "../types/order/cart";
+import type { Pricing } from "../types/order/pricing";
 
 interface CartPageProps {
   onCartChange?: () => void
@@ -160,7 +161,6 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
                     <Box sx={{ flex: 1 }}>
                       <Typography
                         sx={{
-                          fontFamily: '"Playfair Display", serif',
                           fontSize: "1rem",
                           mb: 0.5,
                         }}
@@ -210,7 +210,6 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
                       <Typography
                         sx={{
-                          fontFamily: '"Playfair Display", serif',
                           fontStyle: "italic",
                           color: theme.palette.primary.main,
                           fontSize: "1.1rem",
@@ -271,12 +270,11 @@ export default function CartPage({ onCartChange, cartCount = 0 }: CartPageProps)
                 <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 3 }}>
-                  <Typography sx={{ fontFamily: '"Playfair Display", serif', fontSize: "1.1rem" }}>
+                  <Typography sx={{ fontSize: "1.1rem" }}>
                     Total
                   </Typography>
                   <Typography
                     sx={{
-                      fontFamily: '"Playfair Display", serif',
                       fontSize: "1.6rem",
                       fontStyle: "italic",
                       color: theme.palette.primary.main,

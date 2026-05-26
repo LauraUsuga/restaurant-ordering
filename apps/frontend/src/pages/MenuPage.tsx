@@ -10,8 +10,8 @@ import {
 import { useEffect, useState, useMemo } from "react"
 import { api } from "../services/api"
 import ModifierDrawer from "../components/ModifierDrawer"
-import type { Product } from "../types/product"
-import Layout from "./Layout"
+import type { Product } from "../types/product/product"
+import Layout from "../layouts/Layout"
 
 interface MenuPageProps {
   onCartChange?: () => void
@@ -316,7 +316,6 @@ export default function MenuPage({
                 justifyContent: "space-between",
               }}>
                 <Typography sx={{
-                  fontFamily: "serif",
                   fontSize: "1.3rem",
                   color: theme.palette.primary.main,
                   fontStyle: "italic",

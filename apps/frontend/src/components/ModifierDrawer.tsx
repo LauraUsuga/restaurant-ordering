@@ -9,7 +9,8 @@ import {
   useTheme,
 } from "@mui/material"
 import { useState } from "react"
-import type { ModifierGroup, ModifierOption, Product } from "../types/product";
+import type { Product } from "../types/product/product";
+import type { ModifierGroup, ModifierOption } from "../types/product/modifiers";
 
 interface SelectedMod {
   groupId: string

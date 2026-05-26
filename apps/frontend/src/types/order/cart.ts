@@ -17,22 +17,3 @@ export type CartItem = {
     priceCents: number
   }[]
 }
-
-export type Pricing = {
-  subtotalCents: number
-  taxCents: number
-  serviceFeeCents: number
-  totalCents: number
-}
-
-export type Order = {
-  _id: string
-  userId: string
-  status: string
-  totalCents: number
-  subtotalCents: number
-  taxCents: number
-  serviceFeeCents: number
-  items: CartItem[]
-  createdAt?: string
-}

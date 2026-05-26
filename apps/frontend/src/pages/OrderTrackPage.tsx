@@ -14,9 +14,9 @@ import {
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { api } from "../services/api"
-import type { Order } from "../types/order"
-import type { TimelineEvent } from "../types/timeline"
-import Layout from "./Layout"
+import type { Order } from "../types/order/order"
+import type { TimelineEvent } from "../types/timeline/timeline"
+import Layout from "../layouts/Layout"
 
 export default function OrderTrackPage() {
   const { orderId } = useParams()

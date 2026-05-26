@@ -15,9 +15,9 @@ import {
 } from "@mui/material"
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import Layout from "./Layout"
+import Layout from "../layouts/Layout"
 import { api } from "../services/api"
-import type { Order } from "../types/order"
+import type { Order } from "../types/order/order"
 
 export default function OrdersPage() {
   const theme = useTheme()
