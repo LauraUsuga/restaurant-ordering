@@ -31,12 +31,15 @@ export default function OrderPage() {
 
   const loadTimeline = async () => {
     const res = await api.get(`/orders/${orderId}/timeline`)
-    setTimeline(res.data)
+
+    console.log("TIMELINE RESPONSE", res.data)
+
+    setTimeline(res.data.events)
   }
 
   const toggleExpand = (id: string) =>
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
-  
+
   useEffect(() => {
     if (!orderId) return
 
