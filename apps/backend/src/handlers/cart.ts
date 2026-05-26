@@ -41,24 +41,40 @@ export const updateCartItem = async (req: any, res: any) => {
   const { id } = req.params
   const { quantity } = req.body
 
-  const item = await CartItem.findByIdAndUpdate(
-    id,
-    { quantity },
-    { new: true }
-  ).populate("productId")
+  const item = await CartItem.findById(id)
 
-  if (!item) return res.status(404).json({ error: "Item not found" })
+  if (!item) {
+    return res.status(404).json({
+      error: "Item not found"
+    })
+  }
+
+  item.quantity = quantity
+
+  // recalcular total
+  item.totalPriceCents =
+    (item.basePriceCents ?? 0) * quantity
+
+  await item.save()
+
+  const populatedItem =
+    await item.populate("productId")
 
   await createTimelineEvent({
     orderId: "cart",
     userId: item.userId!,
     type: "CART_ITEM_UPDATED",
     source: "web",
-    correlationId: req.headers["x-correlation-id"] || "unknown",
-    payload: { itemId: id, quantity }
+    correlationId:
+      req.headers["x-correlation-id"] ||
+      "unknown",
+    payload: {
+      itemId: id,
+      quantity
+    }
   })
 
-  return res.json(item)
+  return res.json(populatedItem)
 }
 
 // DELETE /cart/items/:id
