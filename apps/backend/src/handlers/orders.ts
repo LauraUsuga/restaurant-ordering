@@ -65,3 +65,18 @@ export const updateOrderStatus = async (req: any, res: any) => {
 
   return res.json(order)
 }
+
+// GET /orders/:orderId/
+export const getOrder = async (req: any, res: any) => {
+  const { orderId } = req.params
+
+  const order = await Order.findById(orderId)
+
+  if (!order) {
+    return res.status(404).json({
+      error: "Order not found"
+    })
+  }
+
+  return res.json(order)
+}
