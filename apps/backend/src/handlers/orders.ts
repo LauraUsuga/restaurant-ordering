@@ -51,7 +51,10 @@ export const createOrder = async (req: any, res: any) => {
     await Order.create({
       userId,
       status: "PENDING",
-      items: cartItems,
+      items: cartItems.map(i => ({
+        ...i.toObject(),
+        productName: i.productName
+      })),
       ...pricing
     })
 
@@ -167,4 +170,68 @@ export const getOrder = async (req: any, res: any) => {
   }
 
   return res.json(order)
+}
+
+// GET /orders/user/:userId
+export const getOrdersByUser = async (req: any, res: any) => {
+  const { userId } = req.params
+
+  const page = Number(req.query.page || 1)
+  const pageSize = Math.min(Number(req.query.pageSize || 5), 50)
+  const sort = req.query.sort === "asc" ? 1 : -1
+  const skip = (page - 1) * pageSize
+
+  const status = req.query.status
+  const orderId = req.query.orderId
+
+  const query: any = { userId }
+
+  if (status) query.status = status
+
+  const baseQuery = Order.find(query)
+
+  const orders = await baseQuery
+    .sort({ createdAt: sort })
+    .skip(skip)
+    .limit(pageSize)
+
+  const total = await Order.countDocuments(query)
+
+  return res.json({
+    orders,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+  })
+}
+
+// GET /orders/user/:userId?page=1&limit=10&sort=desc&query=...
+export const getUserOrders = async (req: any, res: any) => {
+  const { userId } = req.params
+
+  const page = Number(req.query.page || 1)
+  const limit = Math.min(Number(req.query.limit || 10), 50)
+  const skip = (page - 1) * limit
+
+  const sortDirection = req.query.sort === "asc" ? 1 : -1
+
+  const orders = await Order.find({ userId })
+    .sort({ createdAt: sortDirection })
+    .skip(skip)
+    .limit(limit)
+
+  const total = await Order.countDocuments({ userId })
+
+  return res.json({
+    data: orders,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  })
 }

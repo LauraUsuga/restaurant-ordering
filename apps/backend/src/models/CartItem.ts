@@ -14,6 +14,7 @@ const CartItemSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product"
     },
+    productName: String,
     quantity: Number,
     selectedModifiers: [SelectedModifierSchema],
     basePriceCents: Number,

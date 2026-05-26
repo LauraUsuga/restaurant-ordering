@@ -16,6 +16,7 @@ export const addCartItem = async (req: any, res: any) => {
   const item = await CartItem.create({
     userId,
     productId,
+    productName: product.name,
     quantity,
     selectedModifiers,
     basePriceCents: product.priceCents,
