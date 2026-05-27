@@ -1,8 +1,9 @@
 import {
   Container,
-  Stack,
   CircularProgress,
   Alert,
+  Typography,
+  Box,
 } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
@@ -10,10 +11,8 @@ import { api } from "../services/api"
 import type { Order } from "../types/order/order"
 import type { TimelineEvent } from "../types/timeline/timeline"
 import Layout from "../components/Layout/Layout"
-
 import OrderSummaryCard from "../components/OrderTrack/OrderSummaryCard"
 import TimelineItem from "../components/OrderTrack/TimelineItem"
-import OrdersHeader from "../components/Orders/OrdersHeader";
 
 export default function OrderTrackPage() {
   const { orderId } = useParams()
@@ -21,21 +20,17 @@ export default function OrderTrackPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [timeline, setTimeline] = useState<TimelineEvent[]>([])
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-
   const [initialLoading, setInitialLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   const stopRef = useRef(false)
 
   const loadInitial = async () => {
     try {
       setError(null)
-
       const [orderRes, timelineRes] = await Promise.all([
         api.get(`/orders/${orderId}`),
         api.get(`/orders/${orderId}/timeline`),
       ])
-
       setOrder(orderRes.data)
       setTimeline(timelineRes.data.events ?? [])
     } catch {
@@ -51,7 +46,6 @@ export default function OrderTrackPage() {
         api.get(`/orders/${orderId}`),
         api.get(`/orders/${orderId}/timeline`),
       ])
-
       setOrder(orderRes.data)
       setTimeline(timelineRes.data.events ?? [])
     } catch (err: any) {
@@ -64,15 +58,12 @@ export default function OrderTrackPage() {
 
   useEffect(() => {
     if (!orderId) return
-
     stopRef.current = false
     loadInitial()
-
     const interval = setInterval(() => {
       if (stopRef.current) return
       void refresh()
     }, 4000)
-
     return () => {
       stopRef.current = true
       clearInterval(interval)
@@ -117,26 +108,45 @@ export default function OrderTrackPage() {
       <Container sx={{ mt: 6, mb: 10, maxWidth: 800 }}>
 
         {/* HEADER */}
-        <OrdersHeader />
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="caption"
+            sx={{ color: "primary.main", letterSpacing: "0.16em", display: "block", mb: 1 }}
+          >
+            ORDER TRACKING
+          </Typography>
+          <Typography variant="h4">
+            Live{" "}
+            <em style={{ color: "inherit" }}>updates</em>
+          </Typography>
+        </Box>
 
-        {/* SUMMARY */}
+        {/* SUMMARY CARD */}
         <OrderSummaryCard order={order} orderId={orderId} />
 
         {/* TIMELINE */}
-        <Stack spacing={2}>
-          {timeline.length === 0 && (
-            <Alert severity="info">Waiting for updates...</Alert>
-          )}
+        <Typography
+          variant="caption"
+          sx={{ color: "primary.main", letterSpacing: "0.16em", display: "block", mb: 2 }}
+        >
+          ACTIVITY
+        </Typography>
 
-          {timeline.map((event) => (
-            <TimelineItem
-              key={event.eventId}
-              event={event}
-              expanded={expanded[event.eventId]}
-              onToggle={() => toggleExpand(event.eventId)}
-            />
-          ))}
-        </Stack>
+        {timeline.length === 0 ? (
+          <Alert severity="info">Waiting for updates...</Alert>
+        ) : (
+          <Box>
+            {timeline.map((event, i) => (
+              <TimelineItem
+                key={event.eventId}
+                event={event}
+                expanded={expanded[event.eventId] ?? false}
+                onToggle={() => toggleExpand(event.eventId)}
+                isLast={i === timeline.length - 1}
+              />
+            ))}
+          </Box>
+        )}
 
       </Container>
     </Layout>

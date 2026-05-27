@@ -4,6 +4,7 @@ export type Order = {
   _id: string
   userId: string
   status: string
+  orderNumber?: string
   totalCents: number
   subtotalCents: number
   taxCents: number
