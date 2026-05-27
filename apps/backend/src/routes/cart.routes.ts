@@ -3,7 +3,7 @@ import {
   addCartItem,
   updateCartItem,
   removeCartItem,
-  getCart
+  getCart,
 } from "../handlers/cart"
 
 const router = Router()
