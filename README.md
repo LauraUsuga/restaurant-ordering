@@ -1,171 +1,216 @@
-# 🍴 fork & fire — Restaurant Ordering System
+# 🍴 Fork & Fire — Restaurant Ordering System
 
-Full-stack restaurant ordering app with menu browsing, product customization, cart management, server-side pricing, and an immutable order timeline (audit trail).
+Restaurant ordering app with:
+
+- Menu browsing
+- Product customization (modifier groups)
+- Cart management
+- Server-side pricing
+- Checkout flow
+- Order tracking with immutable timeline (audit trail)
 
 ---
 
-## Architecture
+## Tech Stack
 
-```
-restaurant-ordering/
-├── backend/          # Node.js + Serverless Framework + MongoDB
-└── frontend/         # React + Vite + MUI
-```
+### Frontend
+- React
+- Vite
+- TypeScript
+- Material UI
 
-| Layer | Tech |
-|---|---|
-| Backend | Node.js 20, TypeScript, Serverless Framework v3, Express (via serverless-http) |
-| Database | MongoDB (local via Docker or Atlas) |
-| Frontend | React 18, Vite, TypeScript, MUI v5 |
-| Infra | AWS Lambda + API Gateway (local: serverless-offline) |
+### Backend
+- Node.js
+- TypeScript
+- Serverless Framework
+- MongoDB Atlas
+
+---
+
+## Project Structure
+
+```txt
+apps/
+├── frontend/
+└── backend/
+```
 
 ---
 
 ## Prerequisites
 
-| Tool | Version | Notes |
-|---|---|---|
-| Node.js | 20.x | Use nvm: `nvm use 20` |
-| npm | 9+ | Comes with Node 20 |
-| Docker | any recent | Only for local MongoDB |
-| Serverless CLI | 3.x | `npm i -g serverless@3` |
+Install:
+
+- Node.js 20+
+- npm
+
+Check versions:
+
+```bash
+node -v
+npm -v
+```
 
 ---
 
-## Environment Setup
+## Environment Variables
 
-### Backend — `backend/.env`
-Copy from the example and fill in values:
+### Backend
+
+Go to backend:
+
 ```bash
-cp backend/.env.example backend/.env
+cd apps/backend
 ```
 
-Required vars:
+Create `.env` from the example:
+
+```bash
+cp .env.example .env
 ```
-MONGODB_URI=mongodb://localhost:27017/restaurant
-TAX_PERCENT=8
-SERVICE_FEE_PERCENT=5
+
+Add the following values:
+
+```env
 PORT=3001
+
+MONGO_URI=mongodb+srv://<USERNAME>:<PASSWORD>@cluster0.wprr1mp.mongodb.net/restaurant?retryWrites=true&w=majority
+
+TAX_PERCENT=10
+SERVICE_FEE_PERCENT=5
 ```
 
-### Frontend — `frontend/.env`
+Replace:
+
+- `<USERNAME>` → your MongoDB Atlas username
+- `<PASSWORD>` → your MongoDB Atlas password
+
+> ⚠️ Note: A ready-to-use MongoDB Atlas connection string is also included in the submission email attached to this repository for easier setup.
+
+Example:
+
+```env
+MONGO_URI=mongodb+srv://myUser:myPassword@cluster0.wprr1mp.mongodb.net/restaurant?retryWrites=true&w=majority
+```
+
+---
+
+### Frontend
+
+Go to frontend:
+
 ```bash
-cp frontend/.env.example frontend/.env
-```
-
-Required vars:
+cd apps/frontend
 ```
 VITE_API_URL=http://localhost:3001
 ```
 
 ---
 
-## How to Run Locally
+## Run the Project
 
-### 1. Start MongoDB
-```bash
-docker run -d --name mongo-restaurant -p 27017:27017 mongo:7
-```
+### 1. Start Backend
 
-### 2. Backend
 ```bash
-cd backend
+cd apps/backend
 npm install
-npm run seed          # loads 7 products with modifiers
-npm run dev           # starts serverless offline on port 3001
+npm run build
+npm run dev
 ```
 
-### 3. Frontend
-```bash
-cd frontend
-npm install
-npm run dev           # starts Vite dev server on port 5173
+Backend runs on:
+
+```txt
+http://localhost:3001
 ```
-
-### Ports
-
-| Service | URL |
-|---|---|
-| Backend API | http://localhost:3001 |
-| Frontend | http://localhost:5173 |
-| MongoDB | mongodb://localhost:27017 |
-
-### Startup order
-1. MongoDB → 2. Backend → 3. Frontend
 
 ---
 
-## How to Test
+### 2. Start Frontend
 
-### Backend tests
+Open another terminal:
+
 ```bash
-cd backend
-npm test              # Jest — unit + integration
-npm run test:watch    # watch mode
-npm run test:coverage # coverage report
+cd apps/frontend
+npm install
+npm run build
+npm run dev
 ```
 
-### Frontend tests
+Frontend runs on:
+
+```txt
+http://localhost:5173
+```
+
+---
+
+## Startup Order
+
+1. Backend
+2. Frontend
+
+---
+
+## Run Tests
+
+### Backend
+
 ```bash
-cd frontend
-npm test              # Vitest
-npm run test:ui       # Vitest UI
-npm run test:coverage
+cd apps/backend
+npm test
+```
+
+---
+
+### Frontend
+
+```bash
+cd apps/frontend
+npm test
 ```
 
 ---
 
 ## Seed Data
 
-The seed script inserts 7 products — 2 of which have the full 3 modifier groups (Protein, Toppings, Sauces):
+Seed inserts:
+
+- 7 products
+- Modifier groups:
+  - Protein (required)
+  - Toppings (optional)
+  - Sauces (optional)
+
+Run seed:
 
 ```bash
-cd backend
+cd apps/backend
 npm run seed
 ```
 
-To reset and re-seed:
-```bash
-npm run seed:reset
-```
-
 ---
 
-## API Reference
+## API Routes
 
 | Method | Route | Description |
 |---|---|---|
-| GET | /menu | All products |
-| POST | /cart/items | Add item to cart |
-| GET | /cart/:userId | Cart with pricing breakdown |
-| PATCH | /cart/items/:id | Update item quantity |
-| DELETE | /cart/items/:id | Remove item |
-| POST | /orders | Create order (202 + orderId) |
-| GET | /orders/:orderId | Order status |
-| GET | /orders/user/:userId | Paginated order history |
-| GET | /orders/:orderId/timeline | Paginated event timeline |
-| PATCH | /orders/:orderId/status | Update order status (internal) |
+| GET | `/menu` | Get menu |
+| POST | `/cart/items` | Add item to cart |
+| GET | `/cart/:userId` | Get cart |
+| PATCH | `/cart/items/:id` | Update quantity |
+| DELETE | `/cart/items/:id` | Remove item |
+| POST | `/orders` | Place order |
+| GET | `/orders/:orderId` | Get order status |
+| GET | `/orders/:orderId/timeline` | Get timeline |
 
 ---
 
-## Key Design Decisions
+## Key Decisions
 
-- **Pricing is server-side only.** The frontend shows an estimate in the drawer for UX, but the final price is always recalculated on the backend before persisting.
-- **Money in integer cents.** No floating-point arithmetic on monetary values.
-- **Timeline is append-only.** `TimelineEvent` documents are never updated or deleted. Deduplication is enforced via `unique` index on `eventId`.
-- **Idempotency on checkout.** `POST /orders` accepts an `Idempotency-Key` header; duplicate requests return the same `orderId`.
-- **PII masking.** Before logging any timeline payload, `maskPII()` replaces sensitive fields (email, phone, etc.) with masked values.
-
----
-
-## Timeline Event Types
-
-| Event | Emitted by |
-|---|---|
-| `CART_ITEM_ADDED` | cart handler (POST /cart/items) |
-| `CART_ITEM_UPDATED` | cart handler (PATCH /cart/items/:id) |
-| `CART_ITEM_REMOVED` | cart handler (DELETE /cart/items/:id) |
-| `PRICING_CALCULATED` | cart handler (GET /cart/:userId) |
-| `ORDER_PLACED` | order handler (POST /orders) |
-| `ORDER_STATUS_CHANGED` | order handler (auto status flow + PATCH /orders/:id/status) |
-| `VALIDATION_FAILED` | any handler on validation error |
+- Pricing is calculated server-side
+- Money uses integer cents
+- Timeline events are append-only
+- Checkout supports idempotency using `Idempotency-Key`
+- Timeline events are sorted by timestamp
+- Payload size is limited
