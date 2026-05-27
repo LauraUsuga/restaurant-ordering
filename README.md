@@ -32,15 +32,18 @@ apps/
 ## Prerequisites
 
 Install:
+
 - Node.js 20+
 - npm
 
 Check versions:
+
 node -v
 npm -v
 
 Clone the repository:
-git clone https://github.com/your-username/restaurant-ordering.git
+
+git clone https://github.com/LauraUsuga/restaurant-ordering
 cd restaurant-ordering
 
 ## Environment Variables
