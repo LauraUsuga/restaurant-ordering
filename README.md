@@ -9,8 +9,6 @@ Restaurant ordering app with:
 - Checkout flow
 - Order tracking with immutable timeline (audit trail)
 
----
-
 ## Tech Stack
 
 ### Frontend
@@ -25,33 +23,25 @@ Restaurant ordering app with:
 - Serverless Framework
 - MongoDB Atlas
 
----
-
 ## Project Structure
 
-```txt
 apps/
 ├── frontend/
 └── backend/
-```
-
----
 
 ## Prerequisites
 
 Install:
-
 - Node.js 20+
 - npm
 
 Check versions:
-
-```bash
 node -v
 npm -v
-```
 
----
+Clone the repository:
+git clone https://github.com/your-username/restaurant-ordering.git
+cd restaurant-ordering
 
 ## Environment Variables
 
@@ -93,8 +83,6 @@ Example:
 MONGO_URI=mongodb+srv://myUser:myPassword@cluster0.wprr1mp.mongodb.net/restaurant?retryWrites=true&w=majority
 ```
 
----
-
 ### Frontend
 
 Go to frontend:
@@ -102,14 +90,13 @@ Go to frontend:
 ```bash
 cd apps/frontend
 ```
-VITE_API_URL=http://localhost:3001
-```
 
----
+VITE_API_URL=http://localhost:3001
 
 ## Run the Project
 
 ### 1. Start Backend
+
 
 ```bash
 cd apps/backend
@@ -119,10 +106,7 @@ npm run dev
 ```
 
 Backend runs on:
-
-```txt
 http://localhost:3001
-```
 
 ---
 
@@ -138,10 +122,7 @@ npm run dev
 ```
 
 Frontend runs on:
-
-```txt
 http://localhost:5173
-```
 
 ---
 
